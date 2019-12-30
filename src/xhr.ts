@@ -2,13 +2,15 @@ import {AxiosRequestConfig, AxiosPromise, AxiosResponse} from './types';
 import {parseHeaders} from './helpers/headers';
 
 export default function xhr(config: AxiosRequestConfig) : AxiosPromise {
-  return new Promise((resolve) => {
-    const {url, method = "get", data = null, headers, responseType} = config;
+  return new Promise((resolve, reject) => {
+    const {url, method = "get", data = null, headers, responseType, timeout} = config;
     /* 初始化XMLHttpRequest对象 */
     let request = new XMLHttpRequest();
     if (responseType) {
       request.responseType = responseType;
     }
+
+    if (timeout) request.timeout = timeout;
     /* 初始化一个请求
      * async：一个可选的布尔参数，默认为true，表示要不要异步执行操作。如果值为false，send()方法直到收到答复前不会返回。
      * 如果true，已完成事务的通知可供事件监听器使用。如果multipart属性为true则这个必须为true，否则将引发异常。
@@ -23,7 +25,10 @@ export default function xhr(config: AxiosRequestConfig) : AxiosPromise {
      * 当 readyState 等于 4 且状态为 200 时，表示响应已就绪：
      */
     request.onreadystatechange = function handleLoad() {
+      // 如果请求的响应结果未就绪，则不作处理
       if (request.readyState !== 4) return;
+      // 如果发生超时或者网络错误，则status为0
+      if (request.status === 0) return;
       const responseHeaders = parseHeaders(request.getAllResponseHeaders());
       const responseData = responseType && responseType !== "text" ? request.response : request.responseText;
       const response: AxiosResponse = {
@@ -34,8 +39,31 @@ export default function xhr(config: AxiosRequestConfig) : AxiosPromise {
         config,
         request
       }
-      resolve(response);
+      handleResponse(response)
     }
+
+
+    /* 处理响应 */
+    function handleResponse(response: AxiosResponse) {
+      if (response.status >= 200 && response.status < 300) {
+        resolve(response);
+      } else {
+        reject(new Error(`Request failed with status code${response.status}`));
+      }
+    }
+
+
+    /* 处理网络异常错误 */
+    request.onerror = function handleError() {
+      reject(new Error("Network Error"));
+    }
+
+    /* 处理超时错误 */
+    request.ontimeout = function handleTimeOut() {
+      reject(new Error(`Timeout of ${timeout} ms exceeded`))
+    }
+
+
     /* 设置请求头 */
     Object.keys(headers).forEach((name) => {
       if (data === null && name.toLowerCase() === "content-type") {

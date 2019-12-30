@@ -14,7 +14,9 @@ export interface AxiosRequestConfig {
   // 设置响应类型
   //对于一个 AJAX 请求的 `response`，我们是可以指定它的响应的数据类型的，通过设置 `XMLHttpRequest` 对象的responseType属性
   // `responseType` 的类型是一个 `XMLHttpRequestResponseType` 类型，它的定义是 `"" | "arraybuffer" | "blob" | "document" | "json" | "text"` 字符串字面量类型。
-  responseType?: XMLHttpRequestResponseType
+  responseType?: XMLHttpRequestResponseType,
+  // 设置请求超时时间
+  timeout?: number
 }
 
 /* 为了让 `method` 只能传入合法的字符串，我们定义一种字符串字面量类型 `Method`： */
