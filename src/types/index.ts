@@ -12,7 +12,7 @@ export interface AxiosRequestConfig {
   // 设置请求头
   headers?: any,
   // 设置响应类型
-  //对于一个 AJAX 请求的 `response`，我们是可以指定它的响应的数据类型的，通过设置 `XMLHttpRequest` 对象的responseType属性
+  // 对于一个 AJAX 请求的 `response`，我们是可以指定它的响应的数据类型的，通过设置 `XMLHttpRequest` 对象的responseType属性
   // `responseType` 的类型是一个 `XMLHttpRequestResponseType` 类型，它的定义是 `"" | "arraybuffer" | "blob" | "document" | "json" | "text"` 字符串字面量类型。
   responseType?: XMLHttpRequestResponseType,
   // 设置请求超时时间
@@ -51,4 +51,15 @@ export interface AxiosResponse {
  *  这样的话，当 `axios` 返回的是 `AxiosPromise` 类型，那么 `resolve` 函数中的参数就是一个 `AxiosResponse` 类型。
  */
 export interface AxiosPromise extends Promise<AxiosResponse>{
+}
+
+/*
+ * 定义错误响应的数据格式
+ */
+export interface AxiosError extends Error{
+  config: AxiosRequestConfig,
+  code?: string,
+  request?: any,
+  response?: AxiosResponse,
+  isAxiosError: boolean
 }
